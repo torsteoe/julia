@@ -37,7 +37,7 @@ function findclusters(E, n, k)
     # Implement kruskal, abort when k elements left.
    
     # for each vertex v in G.v
-    nodes = []
+    nodes = Array{DisjointSetNode}(undef, 0)
     for i in 1:n
         node = DisjointSetNode()
         makeset(node)
@@ -45,14 +45,31 @@ function findclusters(E, n, k)
     end
     for edge in E
         if k==0
+            println("A: ", A)
             return A
-        if findset(edge.u) != findset(edge.v)
-            push!(A, (edge.u, edge.v))
-            union!(findset(edge.u), findset(edge.v))
+        end
+        if findset(nodes[edge[2]]) != findset(nodes[edge[3]])
+            push!(A, [edge[2], edge[3]])
+            union!(findset(nodes[edge[2]]), findset(nodes[edge[3]]))
             k-=1
         end
         # finish when k sets left
     end
     return A
 end
+printstyled("\n\n\n---------------\nKjører tester!!\n---------------\n"; color = :magenta)
 
+findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2),
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 2) 
+
+using Test
+@testset "Tester" begin
+    @test sort([sort(x) for x in findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2), 
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 2)]) == sort([[1, 2], [3, 4]])
+    @test sort([sort(x) for x in findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2), 
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 3)]) == sort([[1], [2], [3, 4]])
+end
+
+println("\nFungerte det? Prøv å kjør koden i inginious!")
+println("Husk at disse testene ikke sjekker alle grensetilfellene")
+println("---------------------------------------------------------\n\n")
