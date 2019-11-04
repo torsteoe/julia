@@ -32,6 +32,7 @@ end
 function findclusters(E, n, k)
     #k = number of clusters
 
+    temp = n
     sort!(E)
     A = [] 
     # Implement kruskal, abort when k elements left.
@@ -43,15 +44,18 @@ function findclusters(E, n, k)
         makeset(node)
         push!(nodes, node) 
     end
+    # lag en array A som er initialisert : [[node1], [node2], ...[noden]]
+    # hver gang node_x og node_y ikke er i samme set legger vi nodey i nodex-array og fjerner node_y fra A
     for edge in E
-        if k==0
+        if temp==k
             println("A: ", A)
             return A
         end
         if findset(nodes[edge[2]]) != findset(nodes[edge[3]])
+            println("i if-setning", A)
             push!(A, [edge[2], edge[3]])
             union!(findset(nodes[edge[2]]), findset(nodes[edge[3]]))
-            k-=1
+            temp-=1
         end
         # finish when k sets left
     end
