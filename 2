@@ -1,3 +1,8 @@
+mutable struct DisjointSetNode
+    rank::Int
+    p::DisjointSetNode
+    DisjointSetNode() = (obj = new(0); obj.p = obj;)
+end
 function findset(x)
     if x != x.p
         x.p = findset(x.p)
@@ -24,31 +29,26 @@ function makeset(v)
     v.rank = 0
 end
 
-
-
-
-
-
 function findclusters(E, n, k)
     #k = number of clusters
 
     temp = n
     sort!(E)
-    A = []
+    A = [] 
     C = [] # contains placement of elements
     # Implement kruskal, abort when k elements left.
-
+   
     # for each vertex v in G.v
     nodes = Array{DisjointSetNode}(undef, 0)
     for i in 1:n
         node = DisjointSetNode()
         makeset(node)
-        push!(nodes, node)
+        push!(nodes, node) 
     # lag en array A som er initialisert : [[node1], [node2], ...[noden]]
         push!(A, [i])
-        push!(C, i)
+        push!(C, [i])
     end
-
+    
     # hver gang node_x og node_y ikke er i samme set legger vi node_y i nodex-array og fjerner node_y fra A
 
 
@@ -63,28 +63,19 @@ function findclusters(E, n, k)
             return B
         end
         if findset(nodes[edge[2]]) != findset(nodes[edge[3]])
-            println("This is A,", A)
+            println(A)
             empty = true
             position_of_2 = C[edge[2]]
             position_of_3 = C[edge[3]]
-            for i in 1:length(A[position_of_3])
-                println("Array two: ", A[position_of_2])
-
-                # fetch element i at three position
-                element = A[position_of_3][1]
-                println("element", element)
-
-                # push element at position of 3 to position of 2
-                push!(A[position_of_2], element)
-
-                # delete element at position of 3 as it is added to the position of 2.
-                deleteat!(A[position_of_3], 1)
-                println("Array two: ", A[position_of_2])
-
-               # update position
-                C[element] = position_of_2
+            array_two = A[position_of_2]
+            array_three = A[position_of_3]
+            
+            for i in 1:length(array_three)
+                push!(array_two, array_three[i])
+                C[array_three[i]] = position_of_2
+                deleteat!(A[position_of_3], i)
             end
-
+                
             union!(findset(nodes[edge[2]]), findset(nodes[edge[3]]))
             temp-=1
         end
@@ -98,3 +89,19 @@ function findclusters(E, n, k)
             end
             return B
 end
+printstyled("\n\n\n---------------\nKjører tester!!\n---------------\n"; color = :magenta)
+
+findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2),
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 2) 
+
+using Test
+@testset "Tester" begin
+    @test sort([sort(x) for x in findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2), 
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 2)]) == sort([[1, 2], [3, 4]])
+    @test sort([sort(x) for x in findclusters([(1, 3, 4), (3, 1, 3), (5, 1, 4), (6, 2, 1), (7, 2, 3), (8, 3, 1), (9, 3, 2), 
+    (10, 4, 1), (11, 4, 2), (12, 4, 3), (4, 2, 4), (2, 1, 2)], 4, 3)]) == sort([[1], [2], [3, 4]])
+end
+
+println("\nFungerte det? Prøv å kjør koden i inginious!")
+println("Husk at disse testene ikke sjekker alle grensetilfellene")
+println("---------------------------------------------------------\n\n")
